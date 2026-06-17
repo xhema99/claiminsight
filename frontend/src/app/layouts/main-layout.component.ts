@@ -1,29 +1,41 @@
-import { Component, inject } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../core/auth.service';
+import { Component, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { SidebarComponent } from './sidebar.component';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, SidebarComponent],
   template: `
-    <div class="min-h-screen bg-gray-50">
-      <nav class="bg-white shadow border-b">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div class="flex items-center gap-6">
-            <span class="text-xl font-bold text-blue-600">ClaimInsight</span>
-            <a routerLink="/dashboard" routerLinkActive="text-blue-600 font-semibold" class="text-gray-600 hover:text-blue-600 transition">Dashboard</a>
-            <a routerLink="/claims" routerLinkActive="text-blue-600 font-semibold" class="text-gray-600 hover:text-blue-600 transition">Reclamos</a>
-            <a routerLink="/claims/new" routerLinkActive="text-blue-600 font-semibold" class="text-gray-600 hover:text-blue-600 transition">Nuevo Reclamo</a>
+    <div class="min-h-screen bg-surface-secondary dark:bg-surface-dark">
+      <app-sidebar [collapsed]="sidebarCollapsed()" (toggle)="sidebarCollapsed.set(!sidebarCollapsed())" />
+
+      <div class="transition-all duration-300 min-h-screen"
+        [class.ml-64]="!sidebarCollapsed()" [class.ml-18]="sidebarCollapsed()">
+
+        <header class="h-16 bg-surface dark:bg-surface-dark border-b border-border dark:border-border-dark flex items-center px-6 sticky top-0 z-30">
+          <div class="flex items-center gap-2 text-sm text-gray-400">
+            <span>ClaimInsight</span>
+            <span>/</span>
+            <span class="text-gray-600 dark:text-gray-300 font-medium">{{ currentPage }}</span>
           </div>
-          <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-500">{{ auth.userName() }}</span>
-            <button (click)="auth.logout()" class="bg-red-500 text-white px-4 py-1.5 rounded text-sm hover:bg-red-600 transition">Salir</button>
-          </div>
-        </div>
-      </nav>
-      <main class="max-w-7xl mx-auto px-4 py-8"><router-outlet /></main>
+        </header>
+
+        <main class="p-6 lg:p-8 animate-fade-in">
+          <router-outlet />
+        </main>
+      </div>
     </div>
   `
 })
-export class MainLayoutComponent { auth = inject(AuthService); }
+export class MainLayoutComponent {
+  sidebarCollapsed = signal(false);
+
+  get currentPage(): string {
+    const path = window.location.pathname;
+    if (path.includes('/dashboard')) return 'Dashboard';
+    if (path.includes('/claims/new')) return 'Nuevo Reclamo';
+    if (path.includes('/claims')) return 'Reclamos';
+    return 'Dashboard';
+  }
+}

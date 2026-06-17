@@ -28,12 +28,12 @@ public class ClaimRepositoryAdapter implements ClaimRepository {
 
     @Override
     public List<Claim> findByStatus(ClaimStatus status) {
-        return repo.findByStatusOrderByCreatedAtDesc(status.name());
+        return repo.findByStatus(status);
     }
 
     @Override
     public long count() { return repo.count(); }
 
     @Override
-    public long countByStatus(ClaimStatus status) { return repo.countByStatus(status.name()); }
+    public long countByStatus(ClaimStatus status) { return repo.countByStatus(status); }
 }
